@@ -1,21 +1,63 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import path from 'path'
+import { app, protocol, BrowserWindow, Menu, shell } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const isMac = process.platform === 'darwin'
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+function createToolbarMenu() {
+  const toolbarMenu = Menu.buildFromTemplate([
+    { 
+      label: 'ファイル',
+      submenu: [
+        {
+          label: '問題ファイルを読み込む'
+        },
+        { type: 'separator' },
+        {
+          label: 'アプリを終了する',
+          role: isMac ? 'close' : 'quit'
+        }
+      ]
+    },
+    { 
+      label: '設定',
+      submenu: [
+        {
+          label: '投影画面設定'
+        }
+      ]
+    },
+    { 
+      label: 'ヘルプ',
+      submenu: [
+        {
+          label: 'このアプリについて'
+        },
+        {
+          label: 'Wiki',
+          click: () => { shell.openExternal('https://github.com/nano-nano/quiz_projection_supporter_advanced/wiki') }
+        },
+      ]
+    },
+  ]);
+  Menu.setApplicationMenu(toolbarMenu);
+}
+
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: path.join(__static, 'app_icon.png'),
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -61,6 +103,7 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
+  createToolbarMenu()
   createWindow()
 })
 
