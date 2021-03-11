@@ -72,6 +72,7 @@ export default defineComponent({
     /** 問題選択ループフラグ */
     const refCanLoopQuizSelect = ref(false);
 
+    /** 投影確認ダイアログの表示状態 */
     const refIsConfirmDialogOpened = ref(false);
 
     // == computed ==
