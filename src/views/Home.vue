@@ -30,6 +30,8 @@
         <sui-checkbox class="checkbox" label="問題選択をループする" v-model="refCanLoopQuizSelect" />
       </div>
     </div>
+
+    <ConfirmDisplayModal :isOpen="refIsConfirmDialogOpened" :quiz="currentCandidateQuiz" :callback="callbackCOnfirmDisplayModal" />
   </div>
 </template>
 
@@ -37,6 +39,7 @@
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import { QuizData } from '@/models';
 import QuizCard from '@/components/QuizCard.vue';
+import ConfirmDisplayModal, { ConfirmDisplayModalResult } from '@/components/modal/ConfirmDisplayModal.vue';
 
 import { MockQuizDataArray } from '@/mocks';
 
@@ -56,7 +59,8 @@ const EMPTY_QUIZ_DATA_WITH_HYPHEN = {
 export default defineComponent({
   name: 'Home',
   components: {
-    QuizCard
+    QuizCard,
+    ConfirmDisplayModal
   },
   setup() {
     /** クイズデータ配列 */
@@ -67,6 +71,8 @@ export default defineComponent({
     const refNextCandidateIdx = ref(0);
     /** 問題選択ループフラグ */
     const refCanLoopQuizSelect = ref(false);
+
+    const refIsConfirmDialogOpened = ref(false);
 
     // == computed ==
 
@@ -142,11 +148,20 @@ export default defineComponent({
       refNextCandidateIdx.value = prevIdx;
     }
     const onClickDisplayBtn = () => {
-      // FIXME: 確認ダイアログの処理が入る
-      refCurrentDisplayedIdx.value = refNextCandidateIdx.value;
+      // 確認ダイアログの表示
+      refIsConfirmDialogOpened.value = true;
     }
     const onClickEraseBtn = () => {
       refCurrentDisplayedIdx.value = null;
+    }
+
+    // == callbacks ==
+
+    const callbackCOnfirmDisplayModal = (result: ConfirmDisplayModalResult) => {
+      refIsConfirmDialogOpened.value = false;
+      if (result == ConfirmDisplayModalResult.OK) {
+        refCurrentDisplayedIdx.value = refNextCandidateIdx.value;
+      }
     }
 
     // XXX: ダミー実装
@@ -159,10 +174,12 @@ export default defineComponent({
       nextCandidateQuiz,
       prevCandidateQuiz,
       refCanLoopQuizSelect,
+      refIsConfirmDialogOpened,
       onClickNextBtn,
       onClickPrevBtn,
       onClickDisplayBtn,
-      onClickEraseBtn
+      onClickEraseBtn,
+      callbackCOnfirmDisplayModal
     }
   }
 });
