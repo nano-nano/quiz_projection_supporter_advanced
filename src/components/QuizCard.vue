@@ -7,7 +7,7 @@
         {{questionText}}
       </div>
     </div>
-    <div class="extra content">
+    <div class="extra content" style="font-size: small;">
       <div>{{answerText}}</div>
       <div>{{anotherAnswerText}}</div>
     </div>

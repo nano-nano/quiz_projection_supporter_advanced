@@ -1,7 +1,7 @@
 'use strict'
 
 import path from 'path'
-import { app, protocol, BrowserWindow, Menu, shell } from 'electron'
+import { app, protocol, BrowserWindow, Menu, shell, MenuItem } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 // import openAboutWindow, { AboutWindowInfo } from 'about-window' 
@@ -57,6 +57,7 @@ function createToolbarMenu() {
       ]
     },
   ]);
+  if (isDevelopment) toolbarMenu.append(new MenuItem({ label: 'リロード', role: 'forceReload' }));
   Menu.setApplicationMenu(toolbarMenu);
 }
 
