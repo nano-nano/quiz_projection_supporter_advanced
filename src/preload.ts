@@ -10,6 +10,22 @@ contextBridge.exposeInMainWorld(
             ipcRenderer.on(IpcChannel.SEND_QUIZ_DATA, (_: any, arg: any) => {
                 callback(arg);
             });
-        }
+        },
+        sendChangingIsShowQuestionId: (val: any) => {
+            ipcRenderer.invoke(IpcChannel.SEND_IS_SHOW_QUESTION_ID, val);
+        },
+        receiveChangingIsShowQuestionId: (callback: (val: any) => void) => {
+            ipcRenderer.on(IpcChannel.SEND_IS_SHOW_QUESTION_ID, (_: any, arg: any) => {
+                callback(arg);
+            });
+        },
+        sendChangingIsShowAnotherAnswer: (val: any) => {
+            ipcRenderer.invoke(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, val);
+        },
+        receiveChangingIsShowAnotherAnswer: (callback: (val: any) => void) => {
+            ipcRenderer.on(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, (_: any, arg: any) => {
+                callback(arg);
+            });
+        },
     }
   );

@@ -190,3 +190,13 @@ ipcMain.handle(IpcChannel.SEND_QUIZ_DATA, (_, args) => {
     projectionWindow.webContents.send(IpcChannel.SEND_QUIZ_DATA, args);
   }
 })
+ipcMain.handle(IpcChannel.SEND_IS_SHOW_QUESTION_ID, (_, args) => {
+  if (projectionWindow != null) {
+    projectionWindow.webContents.send(IpcChannel.SEND_IS_SHOW_QUESTION_ID, args);
+  }
+})
+ipcMain.handle(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, (_, args) => {
+  if (projectionWindow != null) {
+    projectionWindow.webContents.send(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, args);
+  }
+})

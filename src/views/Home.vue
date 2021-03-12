@@ -25,8 +25,8 @@
         <sui-button size="large" :disabled="isQuizDataNotLoaded" @click="onClickSelectByQuestionIdBtn">問題IDで選択する</sui-button>
       </div>
       <div class="row operation">
-        <sui-checkbox class="checkbox" label="別解を表示" />
-        <sui-checkbox class="checkbox" label="問題IDを表示" />
+        <sui-checkbox class="checkbox" label="別解を表示" v-model="refIsShowAnotherAnswer" />
+        <sui-checkbox class="checkbox" label="問題IDを表示" v-model="refIsShowQuestionId" />
         <sui-checkbox class="checkbox" label="問題選択をループする" v-model="refCanLoopQuizSelect" />
       </div>
     </div>
@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import { computed, defineComponent, ref, watch } from '@vue/composition-api';
 import { QuizData } from '@/models';
 import QuizCard from '@/components/QuizCard.vue';
 import ConfirmDisplayModal, { ConfirmDisplayModalResult } from '@/components/modal/ConfirmDisplayModal.vue';
@@ -72,13 +72,26 @@ export default defineComponent({
     const refCurrentDisplayedIdx = ref(null as number | null)
     /** 次表示候補問題index */
     const refNextCandidateIdx = ref(0);
-    /** 問題選択ループフラグ */
+    /** 別解表示チェックボックス状態 */ 
+    const refIsShowAnotherAnswer = ref(false);
+    /** 問題ID表示チェックボックス状態 */ 
+    const refIsShowQuestionId = ref(false);
+    /** 問題選択ループチェックボックス状態 */ 
     const refCanLoopQuizSelect = ref(false);
 
     /** 投影確認モーダルの表示状態 */
     const refIsConfirmModalOpened = ref(false);
     /** 問題ID選択モーダルの表示状態 */
     const refIsSelectByQuestionIdModalOpened = ref(false);
+
+    // == watch ==
+
+    watch(refIsShowAnotherAnswer, (newVal, _) => {
+      window.ipcApi.sendChangingIsShowAnotherAnswer(newVal);
+    });
+    watch(refIsShowQuestionId, (newVal, _) => {
+      window.ipcApi.sendChangingIsShowQuestionId(newVal);
+    });
 
     // == computed ==
 
@@ -192,6 +205,8 @@ export default defineComponent({
       currentCandidateQuiz,
       nextCandidateQuiz,
       prevCandidateQuiz,
+      refIsShowAnotherAnswer,
+      refIsShowQuestionId,
       refCanLoopQuizSelect,
       refIsConfirmModalOpened,
       refIsSelectByQuestionIdModalOpened,

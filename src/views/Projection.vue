@@ -1,8 +1,17 @@
 <template>
   <div class="root">
-    <p>{{refQuiz.question}}</p>
-    <p>{{refQuiz.answer}}</p>
-    <p>{{refQuiz.anotherAnswer}}</p>
+    <div class="ui segment" style="height: 50%;">
+      <div v-if="refIsShowQuestionId">【問題ID: {{refQuiz.id}}】</div>
+      {{refQuiz.question}}
+    </div>
+    <div class="ui segments" style="height: 50%;">
+      <div class="ui segment" :style="{ height: (refIsShowAnotherAnswer ? 50 : 100 ) + '%' }">
+        {{refQuiz.answer}}
+      </div>
+      <div class="ui segment" :style="{ height: (refIsShowAnotherAnswer ? 50 : 0 ) + '%' }" v-if="refIsShowAnotherAnswer">
+        {{refQuiz.anotherAnswer}}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -23,15 +32,25 @@ export default defineComponent({
   },
   setup() {
     const refQuiz = ref(INIT_QUIZ_DATA);
+    const refIsShowQuestionId = ref(false);
+    const refIsShowAnotherAnswer = ref(false);
 
     onMounted(() => {
-      window.ipcApi.receiveQuizData((quiz: any) => {
+      window.ipcApi.receiveQuizData((quiz) => {
         refQuiz.value = quiz;
-      })
+      });
+      window.ipcApi.receiveChangingIsShowQuestionId((val) => {
+        refIsShowQuestionId.value = val;
+      });
+      window.ipcApi.receiveChangingIsShowAnotherAnswer((val) => {
+        refIsShowAnotherAnswer.value = val;
+      });
     })
 
     return {
-      refQuiz
+      refQuiz,
+      refIsShowQuestionId,
+      refIsShowAnotherAnswer
     }
   }
 });
@@ -43,5 +62,6 @@ export default defineComponent({
   flex-direction: column;
   height: 100vh;
   width: 100vw;
+  padding: 2.5%;
 }
 </style>
