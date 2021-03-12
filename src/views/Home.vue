@@ -80,7 +80,7 @@ export default defineComponent({
     const isQuizDataNotLoaded = computed(() => refQuizDataArray.value.length == 0);
 
     const currentDisplayedQuiz = computed(() => {
-      return refCurrentDisplayedIdx.value == null ? EMPTY_QUIZ_DATA : refQuizDataArray.value[refCurrentDisplayedIdx.value];
+      return refCurrentDisplayedIdx.value == null ? EMPTY_QUIZ_DATA_WITH_HYPHEN : refQuizDataArray.value[refCurrentDisplayedIdx.value];
     });
     const currentCandidateQuiz = computed(() => {
       return refQuizDataArray.value.length == 0 ? EMPTY_QUIZ_DATA_WITH_HYPHEN : refQuizDataArray.value[refNextCandidateIdx.value];
@@ -154,6 +154,7 @@ export default defineComponent({
     }
     const onClickEraseBtn = () => {
       refCurrentDisplayedIdx.value = null;
+      window.ipcApi.sendQuizData(EMPTY_QUIZ_DATA);
     }
 
     // == callbacks ==
@@ -162,6 +163,7 @@ export default defineComponent({
       refIsConfirmDialogOpened.value = false;
       if (result == ConfirmDisplayModalResult.OK) {
         refCurrentDisplayedIdx.value = refNextCandidateIdx.value;
+        window.ipcApi.sendQuizData(currentDisplayedQuiz.value);
       }
     }
 

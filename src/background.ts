@@ -1,13 +1,17 @@
 'use strict'
 
 import path from 'path'
-import { app, protocol, BrowserWindow, Menu, shell, MenuItem } from 'electron'
+import { app, protocol, BrowserWindow, Menu, shell, MenuItem, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import { IpcChannel } from './constants'
 // import openAboutWindow, { AboutWindowInfo } from 'about-window' 
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const isMac = process.platform === 'darwin'
+
+let mainWindow: BrowserWindow | null = null
+let projectionWindow: BrowserWindow | null = null
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -32,6 +36,16 @@ function createToolbarMenu() {
     { 
       label: '設定',
       submenu: [
+        {
+          label: '投影画面を開く/閉じる',
+          click: () => {
+            if (projectionWindow == null) {
+              createProjectionWindow()
+            } else {
+              projectionWindow.close()
+            }
+          }
+        },
         {
           label: '投影画面設定'
         }
@@ -58,31 +72,71 @@ function createToolbarMenu() {
     },
   ]);
   if (isDevelopment) toolbarMenu.append(new MenuItem({ label: 'リロード', role: 'forceReload' }));
-  Menu.setApplicationMenu(toolbarMenu);
+  Menu.setApplicationMenu(toolbarMenu)
 }
 
+/**
+ * メインウィンドウを生成・表示する
+ */
 async function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
     icon: path.join(__static, 'app_icon.png'),
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean
+      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+      contextIsolation: true,
+      worldSafeExecuteJavaScript: true,
+      preload: path.join(__dirname, 'preload.js')
     }
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    await mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
+    if (!process.env.IS_TEST) mainWindow.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
-    win.loadURL('app://./index.html')
+    mainWindow.loadURL('app://./index.html')
   }
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
+  createToolbarMenu()
+}
+
+/**
+ * 投影用ウィンドウを生成・表示する
+ */
+async function createProjectionWindow() {
+  projectionWindow = new BrowserWindow({
+    width: 1280,
+    height: 720,
+    parent: mainWindow!,
+    title: "",
+    icon: path.join(__static, 'app_icon.png'),
+    webPreferences: {
+      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+      contextIsolation: true,
+      worldSafeExecuteJavaScript: true,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    await projectionWindow.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}#/projection`)
+    if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
+  } else {
+    createProtocol('app')
+    projectionWindow.loadURL('app://./index.html#/projection')
+  }
+  projectionWindow.on('closed', () => {
+    projectionWindow = null
+  })
+  projectionWindow!.removeMenu()
 }
 
 // Quit when all windows are closed.
@@ -130,3 +184,9 @@ if (isDevelopment) {
     })
   }
 }
+
+ipcMain.handle(IpcChannel.SEND_QUIZ_DATA, (_, args) => {
+  if (projectionWindow != null) {
+    projectionWindow.webContents.send(IpcChannel.SEND_QUIZ_DATA, args);
+  }
+})

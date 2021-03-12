@@ -1,4 +1,10 @@
+interface Window {
+    ipcApi: IpcApi;
+}
 declare module 'semantic-ui-vue';
-
-// https://github.com/electron-userland/electron-webpack/issues/172
 declare const __static: string;
+
+type IpcApi = {
+    sendQuizData: (quiz: any) => void
+    receiveQuizData: (callback: (quiz: any) => void) => void
+}
