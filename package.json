@@ -18,10 +18,12 @@
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-vue": "^0.11.0",
     "vue": "^2.6.11",
+    "vue-color": "^2.8.1",
     "vue-router": "^3.2.0"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",
+    "@types/vue-color": "^2.4.3",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -47,7 +47,12 @@ function createToolbarMenu() {
           }
         },
         {
-          label: '投影画面設定'
+          label: '投影画面設定',
+          click: () => {
+            if (mainWindow != null) {
+              mainWindow.webContents.send(IpcChannel.SEND_OPEN_PROJECTION_SETTINGS_MODAL, null);
+            }
+          }
         }
       ]
     },

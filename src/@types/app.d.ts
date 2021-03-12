@@ -11,4 +11,5 @@ type IpcApi = {
     receiveChangingIsShowQuestionId: (callback: (val: any) => void) => void;
     sendChangingIsShowAnotherAnswer: (val: any) => void;
     receiveChangingIsShowAnotherAnswer: (callback: (val: any) => void) => void;
+    receiveOpenProjectionSettingsModal: (callback: () => void) => void;
 }

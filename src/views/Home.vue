@@ -33,15 +33,21 @@
 
     <ConfirmDisplayModal :isOpen="refIsConfirmModalOpened" :quiz="currentCandidateQuiz" :callback="callbackConfirmDisplayModal" />
     <SelectByQuestionIdModal :isOpen="refIsSelectByQuestionIdModalOpened" :questionIdArray="questionIdArray" :callback="callbackSelectByQuestionIdModal" />
+    <ProjectionSettingsModal
+      :isOpen="refIsProjectionSettingsModalOpened"
+      :settings="refProjectionSettings" 
+      :closeCallback="callbackProjectionSettingsCloseModal"
+      :changeCallback="callbackProjectionSettingsChanged" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from '@vue/composition-api';
-import { QuizData } from '@/models';
+import { computed, defineComponent, onMounted, toRefs, reactive, ref, watch } from '@vue/composition-api';
+import { QuizData, ProjectionSettings } from '@/models';
 import QuizCard from '@/components/QuizCard.vue';
 import ConfirmDisplayModal, { ConfirmDisplayModalResult } from '@/components/modal/ConfirmDisplayModal.vue';
 import SelectByQuestionIdModal from '@/components/modal/SelectByQuestionIdModal.vue';
+import ProjectionSettingsModal from '@/components/modal/ProjectionSettingsModal.vue';
 
 import { MockQuizDataArray } from '@/mocks';
 
@@ -50,20 +56,30 @@ const EMPTY_QUIZ_DATA = {
   question: '',
   answer: '',
   anotherAnswer: ''
-} as QuizData
+} as QuizData;
 const EMPTY_QUIZ_DATA_WITH_HYPHEN = {
   id: '---',
   question: '---',
   answer: '---',
   anotherAnswer: '---'
-} as QuizData
+} as QuizData;
+const DEFAULT_SETTINGS = {
+    questionFontSize: 50,
+    answerFontSize: 40,
+    anotherAnswerFontSize: 40,
+    textColor: '#000000ff',
+    backgroundColor: '#ffffffff',
+    frameColor: '#000000',
+    questionAnswerSeparatePosition: 50
+} as ProjectionSettings;
 
 export default defineComponent({
   name: 'Home',
   components: {
     QuizCard,
     ConfirmDisplayModal,
-    SelectByQuestionIdModal
+    SelectByQuestionIdModal,
+    ProjectionSettingsModal
   },
   setup() {
     /** クイズデータ配列 */
@@ -78,18 +94,28 @@ export default defineComponent({
     const refIsShowQuestionId = ref(false);
     /** 問題選択ループチェックボックス状態 */ 
     const refCanLoopQuizSelect = ref(false);
+    /** 投影設定 */
+    const refProjectionSettings = ref(DEFAULT_SETTINGS);
 
     /** 投影確認モーダルの表示状態 */
     const refIsConfirmModalOpened = ref(false);
     /** 問題ID選択モーダルの表示状態 */
     const refIsSelectByQuestionIdModalOpened = ref(false);
+    /** 投影設定モーダルの表示状態 */
+    const refIsProjectionSettingsModalOpened = ref(false);
+
+    onMounted(() => {
+      window.ipcApi.receiveOpenProjectionSettingsModal(() => {
+        refIsProjectionSettingsModalOpened.value = true;
+      });
+    });
 
     // == watch ==
 
-    watch(refIsShowAnotherAnswer, (newVal, _) => {
+    watch(refIsShowAnotherAnswer, (newVal) => {
       window.ipcApi.sendChangingIsShowAnotherAnswer(newVal);
     });
-    watch(refIsShowQuestionId, (newVal, _) => {
+    watch(refIsShowQuestionId, (newVal) => {
       window.ipcApi.sendChangingIsShowQuestionId(newVal);
     });
 
@@ -194,6 +220,13 @@ export default defineComponent({
       const index = refQuizDataArray.value.findIndex((e) => e.id == result);
       if (index != -1) refNextCandidateIdx.value = index;
     }
+    const callbackProjectionSettingsCloseModal = () => {
+      refIsProjectionSettingsModalOpened.value = false;
+    }
+    const callbackProjectionSettingsChanged = (newVal: ProjectionSettings | null) => {
+      // refProjectionSettings.value = newVal;
+      console.log(newVal);
+    }
 
     // XXX: ダミー実装
     refQuizDataArray.value = [...refQuizDataArray.value, ...MockQuizDataArray]
@@ -208,15 +241,19 @@ export default defineComponent({
       refIsShowAnotherAnswer,
       refIsShowQuestionId,
       refCanLoopQuizSelect,
+      refProjectionSettings,
       refIsConfirmModalOpened,
       refIsSelectByQuestionIdModalOpened,
+      refIsProjectionSettingsModalOpened,
       onClickNextBtn,
       onClickPrevBtn,
       onClickDisplayBtn,
       onClickEraseBtn,
       onClickSelectByQuestionIdBtn,
       callbackConfirmDisplayModal,
-      callbackSelectByQuestionIdModal
+      callbackSelectByQuestionIdModal,
+      callbackProjectionSettingsCloseModal,
+      callbackProjectionSettingsChanged
     }
   }
 });

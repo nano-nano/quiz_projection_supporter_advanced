@@ -27,5 +27,10 @@ contextBridge.exposeInMainWorld(
                 callback(arg);
             });
         },
+        receiveOpenProjectionSettingsModal: (callback: () => void) => {
+            ipcRenderer.on(IpcChannel.SEND_OPEN_PROJECTION_SETTINGS_MODAL, (_1: any, _2: any) => {
+                callback();
+            });
+        },
     }
   );
