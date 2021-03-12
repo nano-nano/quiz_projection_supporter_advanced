@@ -128,7 +128,7 @@ async function createProjectionWindow() {
   })
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     await projectionWindow.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}#/projection`)
-    if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
+    // if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
   } else {
     createProtocol('app')
     projectionWindow.loadURL('app://./index.html#/projection')

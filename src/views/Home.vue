@@ -22,7 +22,7 @@
       </div>
       <div class="row operation">
         <sui-button size="large" :disabled="isQuizDataNotLoaded" @click="onClickEraseBtn">投影画面の表示を消す</sui-button>
-        <sui-button size="large" :disabled="isQuizDataNotLoaded">問題IDで選択する</sui-button>
+        <sui-button size="large" :disabled="isQuizDataNotLoaded" @click="onClickSelectByQuestionIdBtn">問題IDで選択する</sui-button>
       </div>
       <div class="row operation">
         <sui-checkbox class="checkbox" label="別解を表示" />
@@ -31,7 +31,8 @@
       </div>
     </div>
 
-    <ConfirmDisplayModal :isOpen="refIsConfirmDialogOpened" :quiz="currentCandidateQuiz" :callback="callbackCOnfirmDisplayModal" />
+    <ConfirmDisplayModal :isOpen="refIsConfirmModalOpened" :quiz="currentCandidateQuiz" :callback="callbackConfirmDisplayModal" />
+    <SelectByQuestionIdModal :isOpen="refIsSelectByQuestionIdModalOpened" :questionIdArray="questionIdArray" :callback="callbackSelectByQuestionIdModal" />
   </div>
 </template>
 
@@ -40,6 +41,7 @@ import { computed, defineComponent, ref } from '@vue/composition-api';
 import { QuizData } from '@/models';
 import QuizCard from '@/components/QuizCard.vue';
 import ConfirmDisplayModal, { ConfirmDisplayModalResult } from '@/components/modal/ConfirmDisplayModal.vue';
+import SelectByQuestionIdModal from '@/components/modal/SelectByQuestionIdModal.vue';
 
 import { MockQuizDataArray } from '@/mocks';
 
@@ -60,7 +62,8 @@ export default defineComponent({
   name: 'Home',
   components: {
     QuizCard,
-    ConfirmDisplayModal
+    ConfirmDisplayModal,
+    SelectByQuestionIdModal
   },
   setup() {
     /** クイズデータ配列 */
@@ -72,12 +75,16 @@ export default defineComponent({
     /** 問題選択ループフラグ */
     const refCanLoopQuizSelect = ref(false);
 
-    /** 投影確認ダイアログの表示状態 */
-    const refIsConfirmDialogOpened = ref(false);
+    /** 投影確認モーダルの表示状態 */
+    const refIsConfirmModalOpened = ref(false);
+    /** 問題ID選択モーダルの表示状態 */
+    const refIsSelectByQuestionIdModalOpened = ref(false);
 
     // == computed ==
 
+    /** クイズデータが読み込まれているか */
     const isQuizDataNotLoaded = computed(() => refQuizDataArray.value.length == 0);
+    const questionIdArray = computed(() => refQuizDataArray.value.map((e) => e.id));
 
     const currentDisplayedQuiz = computed(() => {
       return refCurrentDisplayedIdx.value == null ? EMPTY_QUIZ_DATA_WITH_HYPHEN : refQuizDataArray.value[refCurrentDisplayedIdx.value];
@@ -150,21 +157,29 @@ export default defineComponent({
     }
     const onClickDisplayBtn = () => {
       // 確認ダイアログの表示
-      refIsConfirmDialogOpened.value = true;
+      refIsConfirmModalOpened.value = true;
     }
     const onClickEraseBtn = () => {
       refCurrentDisplayedIdx.value = null;
       window.ipcApi.sendQuizData(EMPTY_QUIZ_DATA);
     }
+    const onClickSelectByQuestionIdBtn = () => {
+      refIsSelectByQuestionIdModalOpened.value = true;
+    }
 
     // == callbacks ==
 
-    const callbackCOnfirmDisplayModal = (result: ConfirmDisplayModalResult) => {
-      refIsConfirmDialogOpened.value = false;
+    const callbackConfirmDisplayModal = (result: ConfirmDisplayModalResult) => {
+      refIsConfirmModalOpened.value = false;
       if (result == ConfirmDisplayModalResult.OK) {
         refCurrentDisplayedIdx.value = refNextCandidateIdx.value;
         window.ipcApi.sendQuizData(currentDisplayedQuiz.value);
       }
+    }
+    const callbackSelectByQuestionIdModal = (result: string) => {
+      refIsSelectByQuestionIdModalOpened.value = false;
+      const index = refQuizDataArray.value.findIndex((e) => e.id == result);
+      if (index != -1) refNextCandidateIdx.value = index;
     }
 
     // XXX: ダミー実装
@@ -172,17 +187,21 @@ export default defineComponent({
 
     return {
       isQuizDataNotLoaded,
+      questionIdArray,
       currentDisplayedQuiz,
       currentCandidateQuiz,
       nextCandidateQuiz,
       prevCandidateQuiz,
       refCanLoopQuizSelect,
-      refIsConfirmDialogOpened,
+      refIsConfirmModalOpened,
+      refIsSelectByQuestionIdModalOpened,
       onClickNextBtn,
       onClickPrevBtn,
       onClickDisplayBtn,
       onClickEraseBtn,
-      callbackCOnfirmDisplayModal
+      onClickSelectByQuestionIdBtn,
+      callbackConfirmDisplayModal,
+      callbackSelectByQuestionIdModal
     }
   }
 });
