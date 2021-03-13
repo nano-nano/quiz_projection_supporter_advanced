@@ -31,12 +31,21 @@
       </div>
     </div>
 
-    <ConfirmDisplayModal :isOpen="refIsConfirmModalOpened" :quiz="currentCandidateQuiz" :callback="callbackConfirmDisplayModal" />
-    <SelectByQuestionIdModal :isOpen="refIsSelectByQuestionIdModalOpened" :questionIdArray="questionIdArray" :callback="callbackSelectByQuestionIdModal" />
+    <ConfirmDisplayModal
+      :isOpen="refIsConfirmModalOpened"
+      :quiz="currentCandidateQuiz"
+      :callback="callbackConfirmDisplayModal" />
+    <SelectByQuestionIdModal
+      :isOpen="refIsSelectByQuestionIdModalOpened"
+      :questionIdArray="questionIdArray"
+      :callback="callbackSelectByQuestionIdModal" />
     <ProjectionSettingsModal
       :isOpen="refIsProjectionSettingsModalOpened"
       :settings="refProjectionSettings" 
-      :closeCallback="callbackProjectionSettingsCloseModal" />
+      :closeCallback="callbackProjectionSettingsModalClosed" />
+    <ImportQuizDataModal 
+      :isOpen="refIsImportQuizDataModalOpened"
+      :closeCallback="callbackImportQuizDataModalClosed" />
   </div>
 </template>
 
@@ -47,6 +56,7 @@ import QuizCard from '@/components/QuizCard.vue';
 import ConfirmDisplayModal, { ConfirmDisplayModalResult } from '@/components/modal/ConfirmDisplayModal.vue';
 import SelectByQuestionIdModal from '@/components/modal/SelectByQuestionIdModal.vue';
 import ProjectionSettingsModal from '@/components/modal/ProjectionSettingsModal.vue';
+import ImportQuizDataModal from '@/components/modal/ImportQuizDataModal.vue'
 
 import { MockQuizDataArray } from '@/mocks';
 import { DEFAULT_SETTINGS, EMPTY_QUIZ_DATA, EMPTY_QUIZ_DATA_WITH_HYPHEN } from '@/constants';
@@ -57,7 +67,8 @@ export default defineComponent({
     QuizCard,
     ConfirmDisplayModal,
     SelectByQuestionIdModal,
-    ProjectionSettingsModal
+    ProjectionSettingsModal,
+    ImportQuizDataModal
   },
   setup() {
     /** クイズデータ配列 */
@@ -81,12 +92,17 @@ export default defineComponent({
     const refIsSelectByQuestionIdModalOpened = ref(false);
     /** 投影設定モーダルの表示状態 */
     const refIsProjectionSettingsModalOpened = ref(false);
+    /** 問題インポートモーダルの表示状態 */
+    const refIsImportQuizDataModalOpened = ref(false);
 
     window.ipcApi.receiveProjectionSettings((newVal) => {
       refProjectionSettings.value = newVal;
     });
     window.ipcApi.receiveOpenProjectionSettingsModal(() => {
       refIsProjectionSettingsModalOpened.value = true;
+    });
+    window.ipcApi.receiveOpenImportQuizDataModal(() => {
+      refIsImportQuizDataModalOpened.value = true;
     });
 
     onMounted(() => {
@@ -178,7 +194,6 @@ export default defineComponent({
       refNextCandidateIdx.value = prevIdx;
     }
     const onClickDisplayBtn = () => {
-      // 確認ダイアログの表示
       refIsConfirmModalOpened.value = true;
     }
     const onClickEraseBtn = () => {
@@ -203,8 +218,11 @@ export default defineComponent({
       const index = refQuizDataArray.value.findIndex((e) => e.id == result);
       if (index != -1) refNextCandidateIdx.value = index;
     }
-    const callbackProjectionSettingsCloseModal = () => {
+    const callbackProjectionSettingsModalClosed = () => {
       refIsProjectionSettingsModalOpened.value = false;
+    }
+    const callbackImportQuizDataModalClosed = () => {
+      refIsImportQuizDataModalOpened.value = false;
     }
 
     // XXX: ダミー実装
@@ -224,6 +242,7 @@ export default defineComponent({
       refIsConfirmModalOpened,
       refIsSelectByQuestionIdModalOpened,
       refIsProjectionSettingsModalOpened,
+      refIsImportQuizDataModalOpened,
       onClickNextBtn,
       onClickPrevBtn,
       onClickDisplayBtn,
@@ -231,7 +250,8 @@ export default defineComponent({
       onClickSelectByQuestionIdBtn,
       callbackConfirmDisplayModal,
       callbackSelectByQuestionIdModal,
-      callbackProjectionSettingsCloseModal
+      callbackProjectionSettingsModalClosed,
+      callbackImportQuizDataModalClosed
     }
   }
 });

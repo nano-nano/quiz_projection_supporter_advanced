@@ -42,6 +42,11 @@ contextBridge.exposeInMainWorld(
             ipcRenderer.on(IpcChannel.GET_PROJECTION_SETTINGS, (_: any, arg: any) => {
                 callback(arg);
             });            
-        }
+        },
+        receiveOpenImportQuizDataModal: (callback: () => void) => {
+            ipcRenderer.on(IpcChannel.SEND_OPEN_IMPORT_QUIZ_DATA_MODAL, () => {
+                callback();
+            });
+        },
     }
   );

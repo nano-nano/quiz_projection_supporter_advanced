@@ -26,7 +26,12 @@ function createToolbarMenu() {
       label: 'ファイル',
       submenu: [
         {
-          label: '問題ファイルを読み込む'
+          label: '問題ファイルを読み込む',
+          click: () => {
+            if (mainWindow != null) {
+              mainWindow.webContents.send(IpcChannel.SEND_OPEN_IMPORT_QUIZ_DATA_MODAL, null);
+            }
+          }
         },
         { type: 'separator' },
         {
@@ -135,7 +140,7 @@ async function createProjectionWindow() {
   })
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     await projectionWindow.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}#/projection`)
-    if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
+    // if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
   } else {
     createProtocol('app')
     projectionWindow.loadURL('app://./index.html#/projection')

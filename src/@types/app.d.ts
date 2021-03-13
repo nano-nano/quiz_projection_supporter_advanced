@@ -15,4 +15,5 @@ type IpcApi = {
     getProjectionSettings: () => void;
     sendProjectionSettings: (val: any) => void;
     receiveProjectionSettings: (callback: (val: any) => void) => void;
+    receiveOpenImportQuizDataModal: (callback: () => void) => void;
 }
