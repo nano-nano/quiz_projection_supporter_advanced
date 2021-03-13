@@ -36,42 +36,20 @@
     <ProjectionSettingsModal
       :isOpen="refIsProjectionSettingsModalOpened"
       :settings="refProjectionSettings" 
-      :closeCallback="callbackProjectionSettingsCloseModal"
-      :changeCallback="callbackProjectionSettingsChanged" />
+      :closeCallback="callbackProjectionSettingsCloseModal" />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, toRefs, reactive, ref, watch } from '@vue/composition-api';
-import { QuizData, ProjectionSettings } from '@/models';
+import { computed, defineComponent, onMounted, ref, watch } from '@vue/composition-api';
+import { QuizData } from '@/models';
 import QuizCard from '@/components/QuizCard.vue';
 import ConfirmDisplayModal, { ConfirmDisplayModalResult } from '@/components/modal/ConfirmDisplayModal.vue';
 import SelectByQuestionIdModal from '@/components/modal/SelectByQuestionIdModal.vue';
 import ProjectionSettingsModal from '@/components/modal/ProjectionSettingsModal.vue';
 
 import { MockQuizDataArray } from '@/mocks';
-
-const EMPTY_QUIZ_DATA = {
-  id: '',
-  question: '',
-  answer: '',
-  anotherAnswer: ''
-} as QuizData;
-const EMPTY_QUIZ_DATA_WITH_HYPHEN = {
-  id: '---',
-  question: '---',
-  answer: '---',
-  anotherAnswer: '---'
-} as QuizData;
-const DEFAULT_SETTINGS = {
-    questionFontSize: 50,
-    answerFontSize: 40,
-    anotherAnswerFontSize: 40,
-    textColor: '#000000ff',
-    backgroundColor: '#ffffffff',
-    frameColor: '#000000',
-    questionAnswerSeparatePosition: 50
-} as ProjectionSettings;
+import { DEFAULT_SETTINGS, EMPTY_QUIZ_DATA, EMPTY_QUIZ_DATA_WITH_HYPHEN } from '@/constants';
 
 export default defineComponent({
   name: 'Home',
@@ -104,10 +82,15 @@ export default defineComponent({
     /** 投影設定モーダルの表示状態 */
     const refIsProjectionSettingsModalOpened = ref(false);
 
+    window.ipcApi.receiveProjectionSettings((newVal) => {
+      refProjectionSettings.value = newVal;
+    });
+    window.ipcApi.receiveOpenProjectionSettingsModal(() => {
+      refIsProjectionSettingsModalOpened.value = true;
+    });
+
     onMounted(() => {
-      window.ipcApi.receiveOpenProjectionSettingsModal(() => {
-        refIsProjectionSettingsModalOpened.value = true;
-      });
+      window.ipcApi.getProjectionSettings();
     });
 
     // == watch ==
@@ -223,10 +206,6 @@ export default defineComponent({
     const callbackProjectionSettingsCloseModal = () => {
       refIsProjectionSettingsModalOpened.value = false;
     }
-    const callbackProjectionSettingsChanged = (newVal: ProjectionSettings | null) => {
-      // refProjectionSettings.value = newVal;
-      console.log(newVal);
-    }
 
     // XXX: ダミー実装
     refQuizDataArray.value = [...refQuizDataArray.value, ...MockQuizDataArray]
@@ -252,8 +231,7 @@ export default defineComponent({
       onClickSelectByQuestionIdBtn,
       callbackConfirmDisplayModal,
       callbackSelectByQuestionIdModal,
-      callbackProjectionSettingsCloseModal,
-      callbackProjectionSettingsChanged
+      callbackProjectionSettingsCloseModal
     }
   }
 });

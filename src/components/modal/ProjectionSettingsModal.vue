@@ -4,31 +4,45 @@
     <sui-modal-content>
       <sui-form-field>
         <label>問題文テキストサイズ</label>
-        <sui-input style="width: 100%;" placeholder="数値入力..." />
+        <sui-input type="number" style="width: 100%;" placeholder="数値入力..." v-model="refSettings.questionFontSize"/>
       </sui-form-field>
       <sui-form-field>
         <label>模範解答テキストサイズ</label>
-        <sui-input style="width: 100%;" placeholder="数値入力..." />
+        <sui-input type="number" style="width: 100%;" placeholder="数値入力..." v-model="refSettings.answerFontSize" />
       </sui-form-field>
       <sui-form-field>
         <label>別解テキストサイズ</label>
-        <sui-input style="width: 100%;" placeholder="数値入力..." />
+        <sui-input type="number" style="width: 100%;" placeholder="数値入力..." v-model="refSettings.anotherAnswerFontSize" />
       </sui-form-field>
       <sui-form-field>
         <label>問題文－模範解答間の枠位置</label>
-        <sui-input style="width: 100%;" placeholder="数値入力..." />
+        <sui-input type="number" style="width: 100%;" placeholder="数値入力..." v-model="refSettings.questionAnswerSeparatePosition" />
       </sui-form-field>
       <sui-form-field>
         <label>テキストカラー</label>
-        <ColorPicker initColor="#000000FF" :onClickPickerBtn="onClickTextColorPickerButton" :onChange="onChangeTextColor" />
+        <ColorPicker
+          :initColor="refSettings.textColor"
+          :onClickPickerBtn="onClickTextColorPickerButton"
+          :onChange="onChangeTextColor"
+          :disabled="refIsOpenBackgroundColorPicker || refIsOpenFrameColorPicker" />
       </sui-form-field>
       <sui-form-field>
         <label>テキスト背景カラー</label>
-        <ColorPicker :initColor="refSettings.backgroundColor" :onClickPickerBtn="onClickBackgroundColorPickerButton" :onChange="onChangeBackgroundColor" />
+        <ColorPicker
+          pickerPos="upper"
+          :initColor="refSettings.backgroundColor"
+          :onClickPickerBtn="onClickBackgroundColorPickerButton"
+          :onChange="onChangeBackgroundColor"
+          :disabled="refIsOpenTextColorPicker || refIsOpenFrameColorPicker" />
       </sui-form-field>
       <sui-form-field>
         <label>枠カラー</label>
-        <ColorPicker initColor="#000000FF" :onClickPickerBtn="onClickFrameColorPickerButton" :onChange="onChangeFrameColor" />
+        <ColorPicker
+          pickerPos="upper"
+          :initColor="refSettings.frameColor"
+          :onClickPickerBtn="onClickFrameColorPickerButton"
+          :onChange="onChangeFrameColor"
+          :disabled="refIsOpenTextColorPicker || refIsOpenBackgroundColorPicker" />
       </sui-form-field>
     </sui-modal-content>
     <sui-modal-actions>
@@ -46,7 +60,6 @@ type Props = {
   isOpen: boolean;
   settings: ProjectionSettings;
   closeCallback: () => void;
-  changeCallback: (result: ProjectionSettings) => void;
 }
 
 export default defineComponent({
@@ -55,7 +68,6 @@ export default defineComponent({
     isOpen: Boolean,
     settings: Object,
     closeCallback: Function,
-    changeCallback: Function,
   },
   components: {
     ColorPicker
@@ -67,8 +79,13 @@ export default defineComponent({
     const refIsOpenFrameColorPicker = ref(false);
 
     // == computed ==
+
     const isPickerOpened = computed(() => 
       refIsOpenTextColorPicker.value || refIsOpenBackgroundColorPicker.value || refIsOpenFrameColorPicker.value);
+
+    // == watch ==
+
+    watch(refSettings.value, () => window.ipcApi.sendProjectionSettings(refSettings.value));
 
     // == methods ==
 
@@ -90,19 +107,19 @@ export default defineComponent({
 
     const onChangeTextColor = (newVal: string) => {
       refSettings.value.textColor = newVal;
-      props.changeCallback(refSettings.value);
     }
     const onChangeBackgroundColor = (newVal: string) => {
       refSettings.value.backgroundColor = newVal;
-      props.changeCallback(refSettings.value);
     }
     const onChangeFrameColor = (newVal: string) => {
       refSettings.value.frameColor = newVal;
-      props.changeCallback(refSettings.value);
     }
 
     return {
       refSettings,
+      refIsOpenTextColorPicker,
+      refIsOpenBackgroundColorPicker,
+      refIsOpenFrameColorPicker,
       isPickerOpened,
       onClickCloseBtn,
       onClickTextColorPickerButton,

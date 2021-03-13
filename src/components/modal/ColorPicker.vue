@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <sui-button toggle style="width: 100%;" :active="refIsShowColorPicker" @click="onClickBtn">色選択</sui-button>
+  <div :style="{ display: 'flex', flexDirection: (pickerPos == 'lower' ? 'column' : 'column-reverse')}">
+    <sui-button toggle style="width: 100%;" :disabled="disabled" :active="refIsShowColorPicker" @click="onClickBtn">色選択</sui-button>
     <Chrome v-if="refIsShowColorPicker" v-model="refColor" />
   </div>
 </template>
@@ -13,6 +13,8 @@ type Props = {
   initColor: string;
   onClickPickerBtn: (isOpen: boolean) => void;
   onChange: (newVal: string) => void;
+  pickerPos: 'upper' | 'lower';
+  disabled: boolean;
 }
 
 export default defineComponent({
@@ -20,7 +22,15 @@ export default defineComponent({
   props: {
     initColor: String,
     onClickPickerBtn: Function,
-    onChange: Function
+    onChange: Function,
+    pickerPos: {
+      type: String,
+      default: 'lower'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
   },
   components: {
     Chrome

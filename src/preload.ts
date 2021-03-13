@@ -28,9 +28,20 @@ contextBridge.exposeInMainWorld(
             });
         },
         receiveOpenProjectionSettingsModal: (callback: () => void) => {
-            ipcRenderer.on(IpcChannel.SEND_OPEN_PROJECTION_SETTINGS_MODAL, (_1: any, _2: any) => {
+            ipcRenderer.on(IpcChannel.SEND_OPEN_PROJECTION_SETTINGS_MODAL, () => {
                 callback();
             });
         },
+        getProjectionSettings: () => {
+            ipcRenderer.invoke(IpcChannel.GET_PROJECTION_SETTINGS, null);
+        },
+        sendProjectionSettings: (val: any) => {
+            ipcRenderer.invoke(IpcChannel.SEND_PROJECTION_SETTINGS, val);
+        },
+        receiveProjectionSettings: (callback: (val: any) => void) => {
+            ipcRenderer.on(IpcChannel.GET_PROJECTION_SETTINGS, (_: any, arg: any) => {
+                callback(arg);
+            });            
+        }
     }
   );

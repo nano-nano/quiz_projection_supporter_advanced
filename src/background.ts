@@ -4,14 +4,16 @@ import path from 'path'
 import { app, protocol, BrowserWindow, Menu, shell, MenuItem, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { IpcChannel } from './constants'
+import { DEFAULT_SETTINGS, IpcChannel } from './constants'
+import { ProjectionSettings } from './models'
 // import openAboutWindow, { AboutWindowInfo } from 'about-window' 
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const isMac = process.platform === 'darwin'
 
 let mainWindow: BrowserWindow | null = null
 let projectionWindow: BrowserWindow | null = null
+
+let projectionSettings: ProjectionSettings = DEFAULT_SETTINGS;
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -29,7 +31,7 @@ function createToolbarMenu() {
         { type: 'separator' },
         {
           label: 'アプリを終了する',
-          role: isMac ? 'close' : 'quit'
+          role: 'quit'
         }
       ]
     },
@@ -76,7 +78,7 @@ function createToolbarMenu() {
       ]
     },
   ]);
-  if (isDevelopment) toolbarMenu.append(new MenuItem({ label: 'リロード', role: 'forceReload' }));
+  if (isDevelopment) toolbarMenu.append(new MenuItem({ label: 'Debug', submenu: [{ label: 'リロード', role: 'forceReload' }] }));
   Menu.setApplicationMenu(toolbarMenu)
 }
 
@@ -133,7 +135,7 @@ async function createProjectionWindow() {
   })
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     await projectionWindow.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}#/projection`)
-    // if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
+    if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()
   } else {
     createProtocol('app')
     projectionWindow.loadURL('app://./index.html#/projection')
@@ -203,5 +205,22 @@ ipcMain.handle(IpcChannel.SEND_IS_SHOW_QUESTION_ID, (_, args) => {
 ipcMain.handle(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, (_, args) => {
   if (projectionWindow != null) {
     projectionWindow.webContents.send(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, args);
+  }
+})
+ipcMain.handle(IpcChannel.GET_PROJECTION_SETTINGS, () => {
+  if (mainWindow != null) {
+    mainWindow.webContents.send(IpcChannel.GET_PROJECTION_SETTINGS, projectionSettings);
+  }
+  if (projectionWindow != null) {
+    projectionWindow.webContents.send(IpcChannel.GET_PROJECTION_SETTINGS, projectionSettings);
+  }
+})
+ipcMain.handle(IpcChannel.SEND_PROJECTION_SETTINGS, (_, args) => {
+  projectionSettings = args;
+  if (mainWindow != null) {
+    mainWindow.webContents.send(IpcChannel.GET_PROJECTION_SETTINGS, projectionSettings);
+  }
+  if (projectionWindow != null) {
+    projectionWindow.webContents.send(IpcChannel.GET_PROJECTION_SETTINGS, projectionSettings);
   }
 })
