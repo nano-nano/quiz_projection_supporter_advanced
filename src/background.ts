@@ -93,6 +93,7 @@ function createToolbarMenu() {
 async function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
+    show: false,
     width: 1280,
     height: 720,
     icon: path.join(__static, 'app_icon.png'),
@@ -105,6 +106,13 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     }
   })
+  mainWindow.once('ready-to-show', () => {
+    createToolbarMenu()
+    if (mainWindow != null) mainWindow.show()
+  })
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -115,10 +123,6 @@ async function createWindow() {
     // Load the index.html when not in development
     mainWindow.loadURL('app://./index.html')
   }
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
-  createToolbarMenu()
 }
 
 /**
@@ -126,6 +130,7 @@ async function createWindow() {
  */
 async function createProjectionWindow() {
   projectionWindow = new BrowserWindow({
+    show: false,
     width: 1280,
     height: 720,
     parent: mainWindow!,
@@ -138,6 +143,10 @@ async function createProjectionWindow() {
       preload: path.join(__dirname, 'preload.js')
     }
   })
+  projectionWindow.once('ready-to-show', () => {
+    if (projectionWindow != null) projectionWindow.show()
+  })
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     await projectionWindow.loadURL(`${process.env.WEBPACK_DEV_SERVER_URL}#/projection`)
     // if (!process.env.IS_TEST) projectionWindow.webContents.openDevTools()

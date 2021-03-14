@@ -1,7 +1,7 @@
 <template>
   <div :style="{ display: 'flex', flexDirection: (pickerPos == 'lower' ? 'column' : 'column-reverse')}">
     <sui-button toggle style="width: 100%;" :disabled="disabled" :active="refIsShowColorPicker" @click="onClickBtn">色選択</sui-button>
-    <Chrome v-if="refIsShowColorPicker" v-model="refColor" />
+    <Chrome v-model="refColor" v-show="refIsShowColorPicker" />
   </div>
 </template>
 
@@ -37,9 +37,15 @@ export default defineComponent({
   },
   setup(props: Props) {
     const refIsShowColorPicker = ref(false);
-    const refColor = ref({ hex8: props.initColor });
+    const refColor = ref(props.initColor);
 
-    watch(refColor, (newVal) => props.onChange(newVal.hex8));
+    watch(refColor, (newVal: any) => {
+      if (newVal.hex8) {
+        props.onChange(newVal.hex8)
+      } else {
+        props.onChange(newVal)
+      }
+    });
 
     const onClickBtn = () => {
       refIsShowColorPicker.value = !refIsShowColorPicker.value;
