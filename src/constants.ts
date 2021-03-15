@@ -7,7 +7,10 @@ export enum IpcChannel {
     SEND_OPEN_PROJECTION_SETTINGS_MODAL = 'send_open_projection_settings_modal',
     GET_PROJECTION_SETTINGS = 'get_projection_settings',
     SEND_PROJECTION_SETTINGS = 'send_projection_setting',
-    SEND_OPEN_IMPORT_QUIZ_DATA_MODAL = 'send_open_import_quiz_data_modal'
+    SEND_OPEN_IMPORT_QUIZ_DATA_MODAL = 'send_open_import_quiz_data_modal',
+    SEND_FILE_OPEN_DIALOG = 'send_file_open_dialog',
+    RECEIVE_FILE_OPEM_DIALOG_RESULT = 'receive_file_open_dialog_result',
+    LOAD_QUIZ_DATA = 'load_quiz_data'
 }
 
 export const EMPTY_QUIZ_DATA = {

@@ -1,11 +1,12 @@
 'use strict'
 
 import path from 'path'
-import { app, protocol, BrowserWindow, Menu, shell, MenuItem, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, Menu, shell, MenuItem, ipcMain, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { DEFAULT_SETTINGS, IpcChannel } from './constants'
 import { ProjectionSettings } from './models'
+import Utils from './utils'
 // import openAboutWindow, { AboutWindowInfo } from 'about-window' 
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -133,7 +134,8 @@ async function createProjectionWindow() {
     show: false,
     width: 1280,
     height: 720,
-    parent: mainWindow!,
+    x: 0,
+    y: 0,
     title: "",
     icon: path.join(__static, 'app_icon.png'),
     webPreferences: {
@@ -237,4 +239,29 @@ ipcMain.handle(IpcChannel.SEND_PROJECTION_SETTINGS, (_, args) => {
   if (projectionWindow != null) {
     projectionWindow.webContents.send(IpcChannel.GET_PROJECTION_SETTINGS, projectionSettings);
   }
+})
+ipcMain.handle(IpcChannel.SEND_FILE_OPEN_DIALOG, () => {
+  dialog.showOpenDialog(mainWindow!, {
+    filters: [
+      { name: 'Excelファイル', extensions: ['xls', 'xlsx'] }
+    ]
+  }).then(result => {
+    if (result.filePaths.length != 0) {
+      if (mainWindow != null) {
+        mainWindow.webContents.send(IpcChannel.RECEIVE_FILE_OPEM_DIALOG_RESULT, result.filePaths[0]);
+      }
+    }
+  })
+})
+ipcMain.handle(IpcChannel.LOAD_QUIZ_DATA, (_, args) => {
+  Utils.createQuizDataArray(args.filePath, args.password).then(quizDataArray => {
+    if (mainWindow != null) {
+      mainWindow.webContents.send(IpcChannel.LOAD_QUIZ_DATA, { isSuccess: true, data: quizDataArray })
+    }
+  }).catch(err => {
+    console.error(err)
+    if (mainWindow != null) {
+      mainWindow.webContents.send(IpcChannel.LOAD_QUIZ_DATA, { isSuccess: false, data: null });
+    }
+  })
 })

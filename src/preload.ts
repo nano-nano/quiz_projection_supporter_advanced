@@ -48,5 +48,21 @@ contextBridge.exposeInMainWorld(
                 callback();
             });
         },
+        sendFileOpenDialog: () => {
+            ipcRenderer.invoke(IpcChannel.SEND_FILE_OPEN_DIALOG, null);
+        },
+        receiveFileOpenDialogResult: (callback: (val: any) => void) => {
+            ipcRenderer.on(IpcChannel.RECEIVE_FILE_OPEM_DIALOG_RESULT, (_: any, arg: any) => {
+                callback(arg);
+            });
+        },
+        loadQuizData: (val1: string, val2: string) => {
+            ipcRenderer.invoke(IpcChannel.LOAD_QUIZ_DATA, { filePath: val1, password: val2 });
+        },
+        receiveLoadQuizData: (callback: (val: any) => void) => {
+            ipcRenderer.on(IpcChannel.LOAD_QUIZ_DATA, (_: any, arg: any) => {
+                callback(arg);
+            });
+        }
     }
   );

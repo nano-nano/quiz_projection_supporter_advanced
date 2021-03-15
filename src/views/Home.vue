@@ -58,7 +58,6 @@ import SelectByQuestionIdModal from '@/components/modal/SelectByQuestionIdModal.
 import ProjectionSettingsModal from '@/components/modal/ProjectionSettingsModal.vue';
 import ImportQuizDataModal from '@/components/modal/ImportQuizDataModal.vue'
 
-import { MockQuizDataArray } from '@/mocks';
 import { DEFAULT_SETTINGS, EMPTY_QUIZ_DATA, EMPTY_QUIZ_DATA_WITH_HYPHEN } from '@/constants';
 
 export default defineComponent({
@@ -221,12 +220,12 @@ export default defineComponent({
     const callbackProjectionSettingsModalClosed = () => {
       refIsProjectionSettingsModalOpened.value = false;
     }
-    const callbackImportQuizDataModalClosed = () => {
+    const callbackImportQuizDataModalClosed = (result: QuizData[] | null) => {
       refIsImportQuizDataModalOpened.value = false;
+      if (result != null) {
+        refQuizDataArray.value = [...refQuizDataArray.value, ...result];
+      }
     }
-
-    // XXX: ダミー実装
-    refQuizDataArray.value = [...refQuizDataArray.value, ...MockQuizDataArray]
 
     return {
       isQuizDataNotLoaded,
