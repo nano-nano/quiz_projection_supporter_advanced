@@ -7,7 +7,6 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { DEFAULT_SETTINGS, IpcChannel } from './constants'
 import { ProjectionSettings } from './models'
 import Utils from './utils'
-// import openAboutWindow, { AboutWindowInfo } from 'about-window' 
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -67,16 +66,6 @@ function createToolbarMenu() {
     { 
       label: 'ヘルプ',
       submenu: [
-        // TODO: ライブラリ側の問題なのか、空のウィンドウしか表示されないのでコメントアウト
-        // {
-        //   label: 'このアプリについて',
-        //   click: () => {
-        //     const info = {
-        //       icon_path: path.join(__static, 'app_icon.png'),
-        //     } as AboutWindowInfo
-        //     openAboutWindow(info)
-        //   }
-        // },
         {
           label: 'Wiki',
           click: () => { shell.openExternal('https://github.com/nano-nano/quiz_projection_supporter_advanced/wiki') }

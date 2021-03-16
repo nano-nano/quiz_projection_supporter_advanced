@@ -13,7 +13,6 @@
   "main": "background.js",
   "dependencies": {
     "@vue/composition-api": "^1.0.0-rc.3",
-    "about-window": "^1.14.0",
     "core-js": "^3.6.5",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-vue": "^0.11.0",
