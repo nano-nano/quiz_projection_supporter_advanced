@@ -1,7 +1,7 @@
 {
   "name": "quiz_projection_supporter_advanced",
-  "version": "0.0.1",
-  "private": true,
+  "version": "1.0.0",
+  "private": false,
   "scripts": {
     "lint": "vue-cli-service lint",
     "electron:build": "vue-cli-service electron:build",
