@@ -13,7 +13,7 @@
         lineHeight: 1.25 + 'em',
         overflow: 'hidden'
       }">
-      <div v-if="refIsShowQuestionId">【問題ID: {{refQuiz.id}}】</div>
+      <div v-if="refIsShowQuestionId">{{(refQuiz.id == '' ? '' : '【問題ID: ' + refQuiz.id + '】')}}</div>
       {{refQuiz.question}}
     </div>
     <div class="ui segments" :style="{ height: (100 - refProjectionSettings.questionAnswerSeparatePosition) + '%' }">
@@ -61,16 +61,20 @@ export default defineComponent({
   components: {
   },
   setup() {
+    /** 投影中のクイズデータ */
     const refQuiz = ref(INIT_QUIZ_DATA);
+    /** 問題ID表示フラグ状態 */ 
     const refIsShowQuestionId = ref(false);
+    /** 別解表示フラグ状態 */ 
     const refIsShowAnotherAnswer = ref(false);
+    /** 投影設定 */
     const refProjectionSettings = ref(DEFAULT_SETTINGS);
 
-    window.ipcApi.receiveQuizData((quiz) => {
-      refQuiz.value = quiz;
+    window.ipcApi.receiveQuizData((quizData) => {
+      refQuiz.value = quizData;
     });
-    window.ipcApi.receiveChangingIsShowQuestionId((val) => {
-      refIsShowQuestionId.value = val;
+    window.ipcApi.receiveChangingIsShowQuestionId((isShow) => {
+      refIsShowQuestionId.value = isShow;
     });
     window.ipcApi.receiveChangingIsShowAnotherAnswer((val) => {
       refIsShowAnotherAnswer.value = val;
@@ -80,7 +84,7 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      window.ipcApi.getProjectionSettings();
+      window.ipcApi.requestProjectionSettings();
     })
 
     return {
@@ -99,9 +103,10 @@ export default defineComponent({
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  padding: 2.5%;
+  padding: 1.5%;
 }
 .ui.segment {
   padding: 10px 15px;
+  margin: 0;
 }
 </style>

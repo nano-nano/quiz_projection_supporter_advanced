@@ -27,3 +27,11 @@ export type ProjectionSettings = {
     /** 問題文と模範解答を分ける枠の位置 */
     questionAnswerSeparatePosition: number;
 }
+
+/** 問題データファイルの読み込み結果を表現するモデル */
+export type ReceiveLoadQuizDataResult = {
+    /** 読み込みに成功したか */
+    isSuccess: boolean,
+    /** データ本体。読み込みに失敗した場合はnull */
+    data: QuizData[] | null
+}

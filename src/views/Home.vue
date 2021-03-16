@@ -103,32 +103,34 @@ export default defineComponent({
     window.ipcApi.receiveOpenImportQuizDataModal(() => {
       refIsImportQuizDataModalOpened.value = true;
     });
+    window.ipcApi.receiveProjectionWindowClosed(() => {
+      refCurrentDisplayedIdx.value = null;
+    });
 
     onMounted(() => {
-      window.ipcApi.getProjectionSettings();
+      window.ipcApi.requestProjectionSettings();
     });
 
     // == watch ==
 
-    watch(refIsShowAnotherAnswer, (newVal) => {
-      window.ipcApi.sendChangingIsShowAnotherAnswer(newVal);
-    });
-    watch(refIsShowQuestionId, (newVal) => {
-      window.ipcApi.sendChangingIsShowQuestionId(newVal);
-    });
+    watch(refIsShowAnotherAnswer, (newVal) => window.ipcApi.sendChangingIsShowAnotherAnswer(newVal));
+    watch(refIsShowQuestionId, (newVal) => window.ipcApi.sendChangingIsShowQuestionId(newVal));
 
     // == computed ==
 
     /** クイズデータが読み込まれているか */
     const isQuizDataNotLoaded = computed(() => refQuizDataArray.value.length == 0);
+    /** 読み込まれているクイズデータの問題ID配列 */
     const questionIdArray = computed(() => refQuizDataArray.value.map((e) => e.id));
-
+    /** 現在表示中問題クイズデータ */
     const currentDisplayedQuiz = computed(() => {
       return refCurrentDisplayedIdx.value == null ? EMPTY_QUIZ_DATA_WITH_HYPHEN : refQuizDataArray.value[refCurrentDisplayedIdx.value];
     });
+    /** 次表示候補問題クイズデータ */
     const currentCandidateQuiz = computed(() => {
       return refQuizDataArray.value.length == 0 ? EMPTY_QUIZ_DATA_WITH_HYPHEN : refQuizDataArray.value[refNextCandidateIdx.value];
     });
+    /** ひとつ次候補問題クイズデータ */
     const nextCandidateQuiz = computed(() => {
       if (refQuizDataArray.value.length == 0) return EMPTY_QUIZ_DATA_WITH_HYPHEN;
   
@@ -144,6 +146,7 @@ export default defineComponent({
       }
       return refQuizDataArray.value[nextIdx];
     });
+    /** ひとつ前候補問題クイズデータ */
     const prevCandidateQuiz = computed(() => {
       if (refQuizDataArray.value.length == 0) return EMPTY_QUIZ_DATA_WITH_HYPHEN;
   

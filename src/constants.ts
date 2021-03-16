@@ -10,7 +10,8 @@ export enum IpcChannel {
     SEND_OPEN_IMPORT_QUIZ_DATA_MODAL = 'send_open_import_quiz_data_modal',
     SEND_FILE_OPEN_DIALOG = 'send_file_open_dialog',
     RECEIVE_FILE_OPEM_DIALOG_RESULT = 'receive_file_open_dialog_result',
-    LOAD_QUIZ_DATA = 'load_quiz_data'
+    LOAD_QUIZ_DATA = 'load_quiz_data',
+    RECEIVE_PROJECTION_WINDOW_CLOSED = 'receive_projection_window_closed'
 }
 
 export const EMPTY_QUIZ_DATA = {

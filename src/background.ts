@@ -158,6 +158,9 @@ async function createProjectionWindow() {
   }
   projectionWindow.on('closed', () => {
     projectionWindow = null
+    if (mainWindow != null) {
+      mainWindow.webContents.send(IpcChannel.RECEIVE_PROJECTION_WINDOW_CLOSED, null);
+    }
   })
   projectionWindow!.removeMenu()
 }

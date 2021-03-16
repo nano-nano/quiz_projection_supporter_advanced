@@ -1,68 +1,56 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IpcChannel } from './constants'
+import { ProjectionSettings, QuizData, ReceiveLoadQuizDataResult } from './models';
 
 contextBridge.exposeInMainWorld(
     'ipcApi', {
-        sendQuizData: (quiz: any) => {
-            ipcRenderer.invoke(IpcChannel.SEND_QUIZ_DATA, quiz);
+        sendQuizData: (quizData: QuizData) => {
+            ipcRenderer.invoke(IpcChannel.SEND_QUIZ_DATA, quizData);
         },
-        receiveQuizData: (callback: (quiz: any) => void) => {
-            ipcRenderer.on(IpcChannel.SEND_QUIZ_DATA, (_: any, arg: any) => {
-                callback(arg);
-            });
+        receiveQuizData: (callback: (quizData: QuizData) => void) => {
+            ipcRenderer.on(IpcChannel.SEND_QUIZ_DATA, (_, arg) => callback(arg));
         },
-        sendChangingIsShowQuestionId: (val: any) => {
-            ipcRenderer.invoke(IpcChannel.SEND_IS_SHOW_QUESTION_ID, val);
+        sendChangingIsShowQuestionId: (isShow: boolean) => {
+            ipcRenderer.invoke(IpcChannel.SEND_IS_SHOW_QUESTION_ID, isShow);
         },
-        receiveChangingIsShowQuestionId: (callback: (val: any) => void) => {
-            ipcRenderer.on(IpcChannel.SEND_IS_SHOW_QUESTION_ID, (_: any, arg: any) => {
-                callback(arg);
-            });
+        receiveChangingIsShowQuestionId: (callback: (isShow: boolean) => void) => {
+            ipcRenderer.on(IpcChannel.SEND_IS_SHOW_QUESTION_ID, (_, arg) => callback(arg));
         },
-        sendChangingIsShowAnotherAnswer: (val: any) => {
-            ipcRenderer.invoke(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, val);
+        sendChangingIsShowAnotherAnswer: (isShow: boolean) => {
+            ipcRenderer.invoke(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, isShow);
         },
-        receiveChangingIsShowAnotherAnswer: (callback: (val: any) => void) => {
-            ipcRenderer.on(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, (_: any, arg: any) => {
-                callback(arg);
-            });
+        receiveChangingIsShowAnotherAnswer: (callback: (isShow: boolean) => void) => {
+            ipcRenderer.on(IpcChannel.SEND_IS_SHOW_ANOTHER_ANSWER, (_, arg: any) => callback(arg));
         },
         receiveOpenProjectionSettingsModal: (callback: () => void) => {
-            ipcRenderer.on(IpcChannel.SEND_OPEN_PROJECTION_SETTINGS_MODAL, () => {
-                callback();
-            });
+            ipcRenderer.on(IpcChannel.SEND_OPEN_PROJECTION_SETTINGS_MODAL, () => callback());
         },
-        getProjectionSettings: () => {
+        requestProjectionSettings: () => {
             ipcRenderer.invoke(IpcChannel.GET_PROJECTION_SETTINGS, null);
         },
-        sendProjectionSettings: (val: any) => {
-            ipcRenderer.invoke(IpcChannel.SEND_PROJECTION_SETTINGS, val);
+        sendProjectionSettings: (projectionSettings: ProjectionSettings) => {
+            ipcRenderer.invoke(IpcChannel.SEND_PROJECTION_SETTINGS, projectionSettings);
         },
-        receiveProjectionSettings: (callback: (val: any) => void) => {
-            ipcRenderer.on(IpcChannel.GET_PROJECTION_SETTINGS, (_: any, arg: any) => {
-                callback(arg);
-            });            
+        receiveProjectionSettings: (callback: (projectionSettings: ProjectionSettings) => void) => {
+            ipcRenderer.on(IpcChannel.GET_PROJECTION_SETTINGS, (_, arg) => callback(arg));            
         },
         receiveOpenImportQuizDataModal: (callback: () => void) => {
-            ipcRenderer.on(IpcChannel.SEND_OPEN_IMPORT_QUIZ_DATA_MODAL, () => {
-                callback();
-            });
+            ipcRenderer.on(IpcChannel.SEND_OPEN_IMPORT_QUIZ_DATA_MODAL, () => callback());
         },
         sendFileOpenDialog: () => {
             ipcRenderer.invoke(IpcChannel.SEND_FILE_OPEN_DIALOG, null);
         },
-        receiveFileOpenDialogResult: (callback: (val: any) => void) => {
-            ipcRenderer.on(IpcChannel.RECEIVE_FILE_OPEM_DIALOG_RESULT, (_: any, arg: any) => {
-                callback(arg);
-            });
+        receiveFileOpenDialogResult: (callback: (filePath: string) => void) => {
+            ipcRenderer.on(IpcChannel.RECEIVE_FILE_OPEM_DIALOG_RESULT, (_, arg) => callback(arg));
         },
-        loadQuizData: (val1: string, val2: string) => {
-            ipcRenderer.invoke(IpcChannel.LOAD_QUIZ_DATA, { filePath: val1, password: val2 });
+        loadQuizData: (filePath: string, password: string) => {
+            ipcRenderer.invoke(IpcChannel.LOAD_QUIZ_DATA, { filePath: filePath, password: password });
         },
-        receiveLoadQuizData: (callback: (val: any) => void) => {
-            ipcRenderer.on(IpcChannel.LOAD_QUIZ_DATA, (_: any, arg: any) => {
-                callback(arg);
-            });
+        receiveLoadQuizData: (callback: (result: ReceiveLoadQuizDataResult) => void) => {
+            ipcRenderer.on(IpcChannel.LOAD_QUIZ_DATA, (_, arg) => callback(arg));
+        },
+        receiveProjectionWindowClosed: (callback: () => void) => {
+            ipcRenderer.on(IpcChannel.RECEIVE_PROJECTION_WINDOW_CLOSED, () => callback());
         }
     }
   );
