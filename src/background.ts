@@ -125,6 +125,7 @@ async function createProjectionWindow() {
     height: 720,
     x: 0,
     y: 0,
+    parent: mainWindow!,
     title: "",
     icon: path.join(__static, 'app_icon.png'),
     webPreferences: {
