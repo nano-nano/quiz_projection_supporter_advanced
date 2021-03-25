@@ -1,7 +1,15 @@
 <template>
   <sui-modal v-model="isOpen" :closable="false" size="small">
-    <sui-modal-header>問題ファイルを選択してください</sui-modal-header>
-    <sui-modal-content>
+    <sui-modal-header
+      @dragover.prevent="refIsDragging = true"
+      @dragleave.prevent="refIsDragging = false"
+      @drop.prevent="onDropFile"
+    >問題ファイルを選択してください（ここへのドラッグ＆ドロップも可）</sui-modal-header>
+    <sui-modal-content
+      @dragover.prevent="refIsDragging = true"
+      @dragleave.prevent="refIsDragging = false"
+      @drop.prevent="onDropFile"
+    >
       <sui-form-field>
         <label>問題ファイルのパス</label>
         <div class="ui action input" style="width: 100%;">
@@ -19,8 +27,8 @@
       </div>
     </sui-modal-content>
     <sui-modal-actions>
-      <sui-button negative @click="onClickCancelBtn">キャンセル</sui-button>
-      <sui-button positive @click="onClickOkBtn">問題を読み込む</sui-button>
+      <sui-button negative :disabled="refIsDragging" @click="onClickCancelBtn">キャンセル</sui-button>
+      <sui-button positive :disabled="refIsDragging" @click="onClickOkBtn">問題を読み込む</sui-button>
     </sui-modal-actions>
   </sui-modal>
 </template>
@@ -46,6 +54,7 @@ export default defineComponent({
     const refFilePath = ref('');
     const refFilePass = ref('');
     const refHasFileLoadError = ref(false);
+    const refIsDragging = ref(false);
 
     const onClickSelectFileBtn = () => window.ipcApi.sendFileOpenDialog();
     const onClickOkBtn = () => {
@@ -56,6 +65,18 @@ export default defineComponent({
       props.closeCallback(null);
       refHasFileLoadError.value = false;
     };
+
+    const onDropFile = (event: DragEvent) => {
+      refIsDragging.value = false;
+      if (!event || !event.dataTransfer || event.dataTransfer.files.length === 0) {
+        return;
+      }
+      const path = event.dataTransfer.files[0].path;
+      if (!path.endsWith('xls') && !path.endsWith('xlsx')) {
+        return;
+      }
+      refFilePath.value = path;
+    }
 
     window.ipcApi.receiveFileOpenDialogResult((filePath: string) => {
       refFilePath.value = filePath;
@@ -72,9 +93,11 @@ export default defineComponent({
       refFilePath,
       refFilePass,
       refHasFileLoadError,
+      refIsDragging,
       onClickSelectFileBtn,
       onClickOkBtn,
-      onClickCancelBtn
+      onClickCancelBtn,
+      onDropFile
     }
   }
 });
